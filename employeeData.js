@@ -1,6 +1,6 @@
 const mysql = require("mysql");
 const inquirer = require("inquirer");
-const table = require('console.table');
+const table = require("console.table");
 
 const connection = mysql.createConnection({
   host: "localhost",
@@ -16,13 +16,13 @@ connection.connect(function(err) {
   start(); //
 });
 
-function start() {
+/* function start() {
   connection.query("SELECT * FROM employee", function(err, res) {
     if (err) throw err;
     console.log(res);
     connection.end();
   });
-}
+} */
 
 function start() {
   inquirer
@@ -35,7 +35,7 @@ function start() {
         "View employees by manager.",
         "View employee roles and departments.",
         "Add new employee.",
-        "Add department and role",
+        "Add department and role.",
         "exit"
       ]
     })
@@ -67,8 +67,9 @@ function start() {
       }      
       });      
 }
+
 function viewAllEmployee(){
-  const query = "SELECT e.id, e.first_name, e.last_name, r.title as title, r.salary as salary, d.department as department, CONCAT(m.first_name ,' ' , m.last_name) AS manager FROM employee e LEFT JOIN employee_role r ON e.role_id = r.role_id LEFT JOIN department d ON r.department_id = d.department_id LEFT JOIN employee m on e.manager_id = m.role_id ORDER BY e.id";
+  const query = "SELECT e.id, e.first_name, e.last_name, r.title as title, r.salary as salary, d.department as department, CONCAT(m.first_name ,' ' , m.last_name) AS manager FROM employee e LEFT JOIN employee_role r ON e.role_id = r.role_id LEFT JOIN department d ON r.department_id = d.id LEFT JOIN employee m on e.manager_id = m.role_id ORDER BY e.id";
   // const query = "SELECT id, first_name, last_name, title FROM employee";
   connection.query(query, function(err, res){
     if (err) throw err;
@@ -88,7 +89,7 @@ function viewByManager(){
 }
 
 function viewEmployeeRole(){
-  const query = "SELECT r.title, r.salary, d.department as department FROM employee_role r LEFT JOIN department d ON r.department_id = d.department_id";
+  const query = "SELECT r.title, r.salary, d.department as department FROM employee_role r LEFT JOIN department d ON r.department_id = d.id";
   connection.query(query, function(err, res){
     if (err) throw err;
     console.table(res);
@@ -122,51 +123,37 @@ function addEmployee(){
           "Leagal Team Lead",
           "Lawyer"
         ]
-      },
-      {
-        name: "actionM",
-        type: "list",
-        message: "Who is the employee's manager?",
-        choices:[
-          "John Smith",
-          "Adam Schiff",
-          "Rose Water"
-        ]
       }
     ])
     .then(function(answer) {
       switch (answer.actionR) {
         case "Sales Lead":
-          answer.role_id = 190;
+          answer.role_id = 100;
+          answer.manager_id = null;
           break;
         case "Salesperson":
-          answer.role_id = 101;
+          answer.role_id = 10; 
+          answer.manager_id =100;
           break;
         case "Lead Engineer":
-          answer.role_id = 290;
+          answer.role_id = 200;
+          answer.manager_id = null;
           break;
         case "Sofware Engineer":
-          answer.role_id = 201;
+          answer.role_id = 20;
+          answer.manager_id = 200;
           break;
         case "accountant":
-          answer.role_id = 390;
+          answer.role_id = 300;
+          answer.manager_id = null;
           break;
         case "Leagal Team Lead":
-          answer.role_id = 490;
+          answer.role_id = 400;
+          answer.manager_id = null;
           break;
         case "Lawyer":
-          answer.role_id = 401;
-          break;
-      }
-      switch (answer.actionM) {
-        case "John Smith":
-          answer.manager_id = 190;
-          break;
-        case "Adam Schiff":
-          answer.manager_id = 290;
-          break;
-        case "Rose Water":
-          answer.manager_id = 490;
+          answer.role_id = 40;
+          answer.manager.id = 400;
           break;
       }
       connection.query(
@@ -186,108 +173,131 @@ function addEmployee(){
     });
 }
 
+
 function addDept(){
   inquirer
     .prompt(
-    {
-      name: "newDept",
-      type: "input",
-      message: "Please input the name of the department to be added."
-    })
-    .then(function(answer){
+      {
+        name: "newDept",
+        type: "input",
+        message: "What is the name of the new department?"
+      }
+    )
+    .then(function(answer) {
       connection.query(
         "INSERT INTO department SET ?",
         {
           department: answer.newDept
-        }, 
+        },
         function(err) {
-          if (err) throw err;   
-          console.log("The new department was added sucessfully."); 
-          addRole();       
-        }        
-        );        
-    });      
-  }
+          if (err) throw err;
+          console.log("The department was created successfully!");    
+          addRole();        
+        }      
+      )
+  });
+}
 
-  function addRole(){
-    inquirer
-      .prompt([
-        {
-          name: "newDeptRole",
-          type: "input",
-          message: "Which department this role belongs to?"
-        },
-        {
-          name: "newTitle",
-          type: "input",
-          message: "Please enter the title of the new role."
-        },
-        {
-          name: "newRoleId",
-          type: "input",
-          message: "Please enter a role id for the title.",
-          validate: function(value) {
-            if (isNaN(value) === false) {
-              return true;
-            }
-            return false;
-          }
-        },
-        {
-          name: "newSalary",
-          type: "input",
-          message: "Please enter the salary for the role.",
-          validate: function(value) {
-            if (isNaN(value) === false) {
-              return true;
-            }
-            return false;
-          }
-        }
-      ])
-    .then(function(answer){
+function addRole(){
+  inquirer
+    .prompt([
+      {
+        name: "newTitle",
+        type: "input",
+        message: "What is the new title?"
+      },
+      {
+        name: "newSalary",
+        type: "input",
+        message: "What is the salary?"
+      },
+      {
+        name: "newRoleId",
+        type: "input",
+        message: "What is the Role Id?"
+      },
+      {
+        name: "newDeptId",
+        type: "input",
+        message: "What is the department ID"
+      }
+    ])
+    .then(function(answer) {
       connection.query(
         "INSERT INTO employee_role SET ?",
-      {
-        title: answer.newTitle,
-        role_id: answer.newRoleId,
-        salary: answer.newSalary,
-        department_id: answer.newDeptId
-      },
-      function(err) {
-        if (err) throw err;
-        start(); 
-      });
-    });
+        { 
+          title: answer.newTitle,
+          salary: answer.newSalary,
+          role_id: answer.newRoleId,
+          department_id: answer.newDeptId
+        },
+        function(err) {
+          if (err) throw err;
+          console.log("The employee role was created successfully!");
+          start(); 
+        }
+      );
+
+
+  });
 }
 
-function updateRole(){
+
+
+
+
+
+
+/* function addDeptAndRole(){
   inquirer
-    .prompt({
-      name: "actionRole",
-      type: "list",
-      message: "What role the employee should be updated to?",
-      choices:[
-        "Sales Lead",
-        "Salesperson",
-        "Lead Engineer",
-        "Sofware Engineer",
-        "accountant",
-        "Leagal Team Lead",
-        "Lawyer"
-      ]
-    }).then(function(answer){
-      switch(answer.actionRole){
-        case "John Smith":
-          answer.manager_id = 190;
-          break;
-        case "Adam Schiff":
-          answer.manager_id = 290;
-          break;
-        case "Rose Water":
-          answer.manager_id = 490;
-          break;
+    .prompt([
+    {
+      name: "newDept",
+      type: "input",
+      message: "Please input the name of the department to be added."
+    },
+    {
+      name: "newTitle",
+      tye: "input",
+      message: "What is the title of the role?",
+      validate: function(value) {
+          if (isNaN(value) === false) {
+              return true;
+          }
+          return false;
       }
-      start();
-    });
+    },
+    {
+      name: "newSalary",
+      type: "input",
+      message: "What is the salary for the role?",
+      validate: function(value) {
+          if (isNaN(value) === false) {
+          return true;
+          }
+          return false;
+      }
+    }
+    ]).then(function(answer) {   
+      connection.query(
+        "INSERT INTO department SET ?",
+        {
+          department: answer.newDept
+        },
+        "INSERT INTO employee_role SET ?",
+        {
+          title: answer.newTitle,
+          role_id: answer.newRoleId,
+          salary: answer.newSalary,
+          department_id: department.id,
+          role_id: department.id*10
+        },
+        function(err) {
+          if (err) throw err;
+          start(); 
+        }
+    )
+  });          
 }
+
+ */

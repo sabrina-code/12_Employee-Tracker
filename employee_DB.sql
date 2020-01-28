@@ -6,7 +6,6 @@ USE employee_DB;
 CREATE TABLE department (
   id INT NOT NULL AUTO_INCREMENT,
   department VARCHAR(30) NULL,
-  department_id INT NULL,
   PRIMARY KEY (id)
 );
 
@@ -23,32 +22,32 @@ CREATE TABLE employee (
   id INT NOT NULL AUTO_INCREMENT,
   first_name VARCHAR(30) NULL,
   last_name VARCHAR(30) NULL,
-  role_id INT NULL,
+  role_id INT NULL, 
   manager_id INT NULL,
   PRIMARY KEY (id)
 );
 
-INSERT INTO department (department, department_id)
-VALUES ("Sales", 100),("Engineering", 200),("Finance", 300),("Legal", 400);
+INSERT INTO department (id, department)
+VALUES (1, "Sales"),(2, "Engineering"),(3, "Finance"),(4, "Legal");
 
 INSERT INTO employee_role (title, salary, role_id, department_id)
-VALUES ("Sales Lead", 100000, 190, 100),
-("Salesperson", 90000, 101, 100),
-("Lead Engineer", 150000, 290, 200),
-("Software Engineer", 120000, 201, 200),
-("Accountant", 125000, 390, 300),
-("Leagal Team Lead", 250000, 490, 400),
-("Lawyer", 190000, 401, 400);
+VALUES ("Sales Lead", 100000, 1000, 1),
+("Salesperson", 90000, 10, 1),
+("Lead Engineer", 150000, 2000, 2),
+("Software Engineer", 120000, 20, 2),
+("Accountant", 125000, 3000, 3),
+("Leagal Team Lead", 250000, 4000, 4),
+("Lawyer", 190000, 40, 4);
 
 INSERT INTO employee (first_name, last_name, role_id, manager_id)
-VALUES ("John", "Smith",190, null),
-("Alice", "Gerber", 101, 190),
-("Henry", "Gerber", 101, 190),
-("Adam", "Schiff", 290, null),
-("Bill", "Payer", 201, 290),
-("Elton", "Screamer", 201, 290),
-("Muse", "Caker", 390, null),
-("Rose", "Water", 490, null),
-("Berkely", "Hill", 401, 490);
+VALUES ("John", "Smith",1000, null),
+("Alice", "Gerber", 10, 1000),
+("Henry", "Gerber", 10, 1000),
+("Adam", "Schiff", 2000, null),
+("Bill", "Payer", 20, 2000),
+("Elton", "Screamer", 20, 2000),
+("Muse", "Caker", 3000, null),
+("Rose", "Water", 4000, null),
+("Berkely", "Hill", 40, 4000);
 
     
